@@ -111,7 +111,7 @@ UIState::UIState(QObject *parent) : QObject(parent) {
   prime_state = new PrimeState(this);
   language = QString::fromStdString(Params().get("LanguageSetting"));
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   // update timer
   timer = new QTimer(this);
   QObject::connect(timer, &QTimer::timeout, this, &UIState::update);
@@ -120,7 +120,7 @@ UIState::UIState(QObject *parent) : QObject(parent) {
 }
 
 void UIState::update() {
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   update_sockets(this);
   update_state(this);
   updateStatus();
@@ -135,7 +135,7 @@ void UIState::update() {
 Device::Device(QObject *parent) : brightness_filter(BACKLIGHT_OFFROAD, BACKLIGHT_TS, BACKLIGHT_DT), QObject(parent) {
   setAwake(true);
   resetInteractiveTimeout();
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   QObject::connect(uiState(), &UIState::uiUpdate, this, &Device::update);
 #endif
 }
@@ -203,7 +203,7 @@ void Device::updateWakefulness(const UIState &s) {
   setAwake(s.scene.ignition || interactive_timeout > 0);
 }
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
 UIState *uiState() {
   static UIState ui_state;
   return &ui_state;

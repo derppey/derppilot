@@ -23,7 +23,7 @@ RadarDataT = capnp.lib.capnp._StructModule
 CarControlT = capnp.lib.capnp._StructModule
 CarParamsT = capnp.lib.capnp._StructModule
 
-# sunnypilot structs
+# chubbs structs
 
 AUTO_OBJ = object()
 

@@ -8,7 +8,7 @@
 
 #include "selfdrive/ui/ui.h"
 
-#ifdef SUNNYPILOT
+#ifdef CHUBBS
 constexpr int toggles_settings_index = 3;
 #else
 constexpr int toggles_settings_index = 2;

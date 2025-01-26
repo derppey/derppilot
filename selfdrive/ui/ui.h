@@ -96,7 +96,7 @@ private:
   bool started_prev = false;
 };
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
 UIState *uiState();
 #endif
 
@@ -134,7 +134,7 @@ public slots:
   void update(const UIState &s);
 };
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
 Device *device();
 #endif
 

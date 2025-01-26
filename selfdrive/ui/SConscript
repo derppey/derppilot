@@ -16,7 +16,7 @@ sp_widgets_src = []
 sp_qt_src = []
 sp_qt_util = []
 if not GetOption('stock_ui'):
-  SConscript(['sunnypilot/SConscript'])
+  SConscript(['chubbs/SConscript'])
   Import('sp_widgets_src', 'sp_qt_src', 'sp_qt_util')
 
 # FIXME: remove this once we're on 5.15 (24.04)

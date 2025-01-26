@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+ * Copyright (c) 2021-, Haibin Wen, chubbs, and a number of other contributors.
  *
- * This file is part of sunnypilot and is licensed under the MIT License.
+ * This file is part of chubbs and is licensed under the MIT License.
  * See the LICENSE.md file in the root directory for more details.
  */
 
@@ -11,11 +11,11 @@
 #include "selfdrive/ui/qt/body.h"
 #include "selfdrive/ui/qt/widgets/offroad_alerts.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/widgets/controls.h"
-#include "selfdrive/ui/sunnypilot/qt/onroad/onroad_home.h"
-#include "selfdrive/ui/sunnypilot/qt/sidebar.h"
-#include "selfdrive/ui/sunnypilot/qt/widgets/prime.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/widgets/controls.h"
+#include "selfdrive/ui/chubbs/qt/onroad/onroad_home.h"
+#include "selfdrive/ui/chubbs/qt/sidebar.h"
+#include "selfdrive/ui/chubbs/qt/widgets/prime.h"
 #define OnroadWindow OnroadWindowSP
 #define LayoutWidget LayoutWidgetSP
 #define Sidebar SidebarSP

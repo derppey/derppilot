@@ -140,7 +140,7 @@ void Sidebar::drawSidebar(QPainter &p) {
   const QRect r = QRect(58, 247, width() - 100, 50);
   p.drawText(r, Qt::AlignLeft | Qt::AlignVCenter, net_type);
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   // metrics
   drawMetric(p, temp_status.first, temp_status.second, 338);
   drawMetric(p, panda_status.first, panda_status.second, 496);

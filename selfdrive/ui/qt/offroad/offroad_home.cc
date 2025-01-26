@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2021-, Haibin Wen, sunnypilot, and a number of other contributors.
+ * Copyright (c) 2021-, Haibin Wen, chubbs, and a number of other contributors.
  *
- * This file is part of sunnypilot and is licensed under the MIT License.
+ * This file is part of chubbs and is licensed under the MIT License.
  * See the LICENSE.md file in the root directory for more details.
  */
 
@@ -49,7 +49,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
     home_layout->setContentsMargins(0, 0, 0, 0);
     home_layout->setSpacing(30);
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
     // left: PrimeAdWidget
     QStackedWidget *left_widget = new QStackedWidget(this);
     QVBoxLayout *left_prime_layout = new QVBoxLayout();

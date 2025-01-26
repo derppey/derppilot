@@ -7,8 +7,8 @@
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/window.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/window.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/window.h"
 #define MainWindow MainWindowSP
 #else
 #include "selfdrive/ui/qt/qt_window.h"

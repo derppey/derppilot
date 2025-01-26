@@ -23,8 +23,8 @@ from openpilot.selfdrive.car.cruise import VCruiseHelper
 from openpilot.selfdrive.car.car_specific import MockCarState
 from openpilot.selfdrive.car.helpers import convert_carControlSP, convert_to_capnp
 
-from openpilot.sunnypilot.mads.mads import MadsParams
-from openpilot.sunnypilot.selfdrive.car import interfaces
+from openpilot.chubbs.mads.mads import MadsParams
+from openpilot.chubbs.selfdrive.car import interfaces
 
 REPLAY = "REPLAY" in os.environ
 
@@ -104,7 +104,7 @@ class Car:
         with car.CarParams.from_bytes(cached_params_raw) as _cached_params:
           cached_params = _cached_params
 
-      fixed_fingerprint = self.params.get("CarPlatform").decode("utf-8")
+      fixed_fingerprint = self.params.get("CarPlatform", encoding='utf-8')
 
       self.CI = get_car(*self.can_callbacks, obd_callback(self.params), experimental_long_allowed, num_pandas, cached_params, fixed_fingerprint)
       interfaces.setup_car_interface_sp(self.CI.CP, self.CI.CP_SP, self.params)
@@ -303,7 +303,7 @@ class Car:
       self.is_metric = self.params.get_bool("IsMetric")
       self.experimental_mode = self.params.get_bool("ExperimentalMode") and self.CP.openpilotLongitudinalControl
 
-      # sunnypilot
+      # chubbs
       self.dynamic_experimental_control = self.params.get_bool("DynamicExperimentalControl")
 
       time.sleep(0.1)

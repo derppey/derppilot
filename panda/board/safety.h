@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sunnypilot/safety_mads.h"
+#include "chubbs/safety_mads.h"
 
 #include "safety_declarations.h"
 #include "can.h"

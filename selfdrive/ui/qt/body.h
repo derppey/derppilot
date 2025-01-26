@@ -6,8 +6,8 @@
 
 #include "common/util.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/ui.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/ui.h"
 #define UIState UIStateSP
 #else
 #include "selfdrive/ui/ui.h"

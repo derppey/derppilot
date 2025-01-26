@@ -3,7 +3,7 @@ import random
 from openpilot.selfdrive.selfdrived.events import Alert, EVENTS
 from openpilot.selfdrive.selfdrived.alertmanager import AlertManager
 
-from openpilot.sunnypilot.selfdrive.selfdrived.events_base import EmptyAlert
+from openpilot.chubbs.selfdrive.selfdrived.events_base import EmptyAlert
 
 
 class TestAlertManager:

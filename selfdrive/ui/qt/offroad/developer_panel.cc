@@ -5,8 +5,8 @@
 #include "selfdrive/ui/qt/widgets/ssh_keys.h"
 #include "common/util.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/widgets/controls.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/widgets/controls.h"
 #else
 #include "selfdrive/ui/qt/widgets/controls.h"
 #endif
@@ -54,7 +54,7 @@ DeveloperPanel::DeveloperPanel(SettingsWindow *parent) : ListWidget(parent) {
     "HyundaiRadarTracksToggle",
     tr("Hyundai: Enable Radar Tracks"),
     tr("Enable this to attempt to enable radar tracks for Hyundai, Kia, and Genesis models equipped with the supported Mando SCC radar. "
-       "This allows sunnypilot to use radar data for improved lead tracking and overall longitudinal performance."), "");
+       "This allows chubbs to use radar data for improved lead tracking and overall longitudinal performance."), "");
   hyundaiRadarTracksToggle->setConfirmation(true, false);
   QObject::connect(hyundaiRadarTracksToggle, &ParamControl::toggleFlipped, [=](bool state) {
     updateToggles(offroad);

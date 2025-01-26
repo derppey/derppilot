@@ -201,12 +201,12 @@ def setup_settings_sunnylink(click, pm: PubMaster, scroll=None):
   click(278, 522)
   time.sleep(UI_DELAY)
 
-def setup_settings_sunnypilot(click, pm: PubMaster, scroll=None):
+def setup_settings_chubbs(click, pm: PubMaster, scroll=None):
   setup_settings_device(click, pm)
   click(278, 852)
   time.sleep(UI_DELAY)
 
-def setup_settings_sunnypilot_mads(click, pm: PubMaster, scroll=None):
+def setup_settings_chubbs_mads(click, pm: PubMaster, scroll=None):
   Params().put_bool("Mads", True)
 
   setup_settings_device(click, pm)
@@ -257,8 +257,8 @@ CASES = {
 
 CASES.update({
   "settings_sunnylink": setup_settings_sunnylink,
-  "settings_sunnypilot": setup_settings_sunnypilot,
-  "settings_sunnypilot_mads": setup_settings_sunnypilot_mads,
+  "settings_chubbs": setup_settings_chubbs,
+  "settings_chubbs_mads": setup_settings_chubbs_mads,
   "settings_trips": setup_settings_trips,
   "settings_vehicle": setup_settings_vehicle,
 })

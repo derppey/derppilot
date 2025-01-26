@@ -23,10 +23,10 @@ from openpilot.selfdrive.controls.lib.latcontrol import MIN_LATERAL_CONTROL_SPEE
 
 from openpilot.system.version import get_build_metadata
 
-from openpilot.sunnypilot.mads.mads import ModularAssistiveDrivingSystem
-from openpilot.sunnypilot.selfdrive.car.car_specific import CarSpecificEventsSP
-from openpilot.sunnypilot.selfdrive.car.cruise_helpers import CruiseHelper
-from openpilot.sunnypilot.selfdrive.selfdrived.events import EventsSP
+from openpilot.chubbs.mads.mads import ModularAssistiveDrivingSystem
+from openpilot.chubbs.selfdrive.car.car_specific import CarSpecificEventsSP
+from openpilot.chubbs.selfdrive.car.cruise_helpers import CruiseHelper
+from openpilot.chubbs.selfdrive.selfdrived.events import EventsSP
 
 REPLAY = "REPLAY" in os.environ
 SIMULATION = "SIMULATION" in os.environ

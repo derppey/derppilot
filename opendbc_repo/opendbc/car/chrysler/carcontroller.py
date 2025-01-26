@@ -4,7 +4,7 @@ from opendbc.car.chrysler import chryslercan
 from opendbc.car.chrysler.values import RAM_CARS, CarControllerParams, ChryslerFlags
 from opendbc.car.interfaces import CarControllerBase
 
-from opendbc.sunnypilot.car.chrysler.mads import MadsCarController
+from opendbc.chubbs.car.chrysler.mads import MadsCarController
 
 
 class CarController(CarControllerBase, MadsCarController):

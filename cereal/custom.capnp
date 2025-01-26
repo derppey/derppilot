@@ -135,7 +135,7 @@ struct OnroadEventSP @0xda96579883444c35 {
 }
 
 struct CarParamsSP @0x80ae746ee2596b11 {
-  flags @0 :UInt32;  # flags for car specific quirks in sunnypilot
+  flags @0 :UInt32;  # flags for car specific quirks in chubbs
 }
 
 struct CarControlSP @0xa5cd762cd951a455 {

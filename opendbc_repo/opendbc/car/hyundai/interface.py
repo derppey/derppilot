@@ -8,9 +8,9 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
 
-from opendbc.sunnypilot.car.hyundai.enable_radar_tracks import enable_radar_tracks
-from opendbc.sunnypilot.car.hyundai.escc import ESCC_MSG
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.chubbs.car.hyundai.enable_radar_tracks import enable_radar_tracks
+from opendbc.chubbs.car.hyundai.escc import ESCC_MSG
+from opendbc.chubbs.car.hyundai.values import HyundaiFlagsSP
 
 ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = structs.CarParams.Ecu

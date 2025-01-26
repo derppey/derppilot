@@ -10,11 +10,11 @@
 #include "selfdrive/ui/ui.h"
 #include "selfdrive/ui/qt/offroad/driverview.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/widgets/controls.h"
-#include "selfdrive/ui/sunnypilot/qt/onroad/onroad_home.h"
-#include "selfdrive/ui/sunnypilot/qt/offroad/offroad_home.h"
-#include "selfdrive/ui/sunnypilot/qt/sidebar.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/widgets/controls.h"
+#include "selfdrive/ui/chubbs/qt/onroad/onroad_home.h"
+#include "selfdrive/ui/chubbs/qt/offroad/offroad_home.h"
+#include "selfdrive/ui/chubbs/qt/sidebar.h"
 #define OnroadWindow OnroadWindowSP
 #define OffroadHome OffroadHomeSP
 #define LayoutWidget LayoutWidgetSP

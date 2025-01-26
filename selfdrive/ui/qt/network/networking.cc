@@ -9,9 +9,9 @@
 #include "selfdrive/ui/qt/qt_window.h"
 #include "selfdrive/ui/qt/util.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/widgets/controls.h"
-#include "selfdrive/ui/sunnypilot/qt/widgets/scrollview.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/widgets/controls.h"
+#include "selfdrive/ui/chubbs/qt/widgets/scrollview.h"
 #else
 #include "selfdrive/ui/qt/widgets/controls.h"
 #include "selfdrive/ui/qt/widgets/scrollview.h"

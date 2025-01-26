@@ -74,7 +74,7 @@ AddOption('--stock-ui',
           action='store_true',
           dest='stock_ui',
           default=False,
-          help='Build stock openpilot UI instead of sunnypilot UI')
+          help='Build stock openpilot UI instead of chubbs UI')
 
 ## Architecture name breakdown (arch)
 ## - larch64: linux tici aarch64
@@ -175,8 +175,8 @@ if arch != "Darwin":
   ldflags += ["-Wl,--as-needed", "-Wl,--no-undefined"]
 
 if not GetOption('stock_ui'):
-  cflags += ["-DSUNNYPILOT"]
-  cxxflags += ["-DSUNNYPILOT"]
+  cflags += ["-DCHUBBS"]
+  cxxflags += ["-DCHUBBS"]
 
 ccflags_option = GetOption('ccflags')
 if ccflags_option:
@@ -392,7 +392,7 @@ SConscript(['third_party/SConscript'])
 
 SConscript(['selfdrive/SConscript'])
 
-SConscript(['sunnypilot/SConscript'])
+SConscript(['chubbs/SConscript'])
 
 if Dir('#tools/cabana/').exists() and GetOption('extras'):
   SConscript(['tools/replay/SConscript'])

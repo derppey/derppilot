@@ -2,7 +2,7 @@
 set -e
 
 # Default values
-DEFAULT_REPO_URL="https://github.com/sunnypilot"
+DEFAULT_REPO_URL="https://github.com/chubbs"
 START_AT_BOOT=false
 RESTORE_MODE=false
 
@@ -148,7 +148,7 @@ install_service() {
         if [ -f "${RUNNER_DIR}/.service" ]; then
             service_name=$(cat "${RUNNER_DIR}/.service")
         else
-            service_name="actions.runner.sunnypilot.$(uname -n)"
+            service_name="actions.runner.chubbs.$(uname -n)"
         fi
         sudo systemctl disable "${service_name}"
     fi

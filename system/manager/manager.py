@@ -42,7 +42,7 @@ def manager_init() -> None:
     ("LongitudinalPersonality", str(log.LongitudinalPersonality.standard)),
   ]
 
-  sunnypilot_default_params: list[tuple[str, str | bytes]] = [
+  chubbs_default_params: list[tuple[str, str | bytes]] = [
     ("DynamicExperimentalControl", "0"),
     ("Mads", "1"),
     ("MadsMainCruiseAllowed", "1"),
@@ -56,7 +56,7 @@ def manager_init() -> None:
     params.put_bool("RecordFront", True)
 
   # set unset params
-  for k, v in (default_params + sunnypilot_default_params):
+  for k, v in (default_params + chubbs_default_params):
     if params.get(k) is None:
       params.put(k, v)
 

@@ -6,9 +6,9 @@
 #include "selfdrive/ui/qt/onroad/model.h"
 #include "selfdrive/ui/qt/widgets/cameraview.h"
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/qt/onroad/buttons.h"
-#include "selfdrive/ui/sunnypilot/qt/onroad/hud.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/qt/onroad/buttons.h"
+#include "selfdrive/ui/chubbs/qt/onroad/hud.h"
 #define ExperimentalButton ExperimentalButtonSP
 #else
 #include "selfdrive/ui/qt/onroad/buttons.h"

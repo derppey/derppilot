@@ -33,7 +33,7 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
     {
       "DynamicExperimentalControl",
       tr("Enable Dynamic Experimental Control"),
-      tr("Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal."),
+      tr("Enable toggle to allow the model to determine when to use chubbs ACC or chubbs End to End Longitudinal."),
       "../assets/offroad/icon_blank.png",
     },
     {
@@ -96,7 +96,7 @@ TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
   }
 
   // Toggles with confirmation dialogs
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   toggles["ExperimentalMode"]->setActiveIcon("../assets/img_experimental.svg");
 #endif
   toggles["ExperimentalMode"]->setConfirmation(true, true);
@@ -192,7 +192,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     pair_device->setVisible(type == PrimeState::PRIME_TYPE_UNPAIRED);
   });
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl(tr("Driver Camera"), tr("PREVIEW"),
@@ -211,7 +211,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   });
   addItem(resetCalibBtn);
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   auto retrainingBtn = new ButtonControl(tr("Review Training Guide"), tr("REVIEW"), tr("Review the rules, features, and limitations of openpilot"));
   connect(retrainingBtn, &ButtonControl::clicked, [=]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to review the training guide?"), tr("Review"), this)) {
@@ -251,7 +251,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     }
   });
 
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   // power buttons
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
@@ -343,7 +343,7 @@ void SettingsWindow::setCurrentPanel(int index, const QString &param) {
 }
 
 SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
-#ifndef SUNNYPILOT
+#ifndef CHUBBS
   // setup two main layouts
   sidebar_widget = new QWidget;
   QVBoxLayout *sidebar_layout = new QVBoxLayout(sidebar_widget);

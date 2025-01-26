@@ -148,7 +148,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable this to attempt to enable radar tracks for Hyundai, Kia, and Genesis models equipped with the supported Mando SCC radar. This allows sunnypilot to use radar data for improved lead tracking and overall longitudinal performance.</source>
+        <source>Enable this to attempt to enable radar tracks for Hyundai, Kia, and Genesis models equipped with the supported Mando SCC radar. This allows chubbs to use radar data for improved lead tracking and overall longitudinal performance.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -490,7 +490,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in sunnypilot.
+        <source>Choose how Automatic Lane Centering (ALC) behaves after the brake pedal is manually pressed in chubbs.
 
 Remain Active: ALC will remain active even after the brake pedal is pressed.
 Pause Steering: ALC will be paused after the brake pedal is manually pressed.</source>
@@ -587,7 +587,7 @@ Pause Steering: ALC will be paused after the brake pedal is manually pressed.</s
         <translation>لقد اكتشف openpilot تغييراً في موقع تركيب الجهاز. تأكد من تثبيت الجهاز بشكل كامل في موقعه وتثبيته بإحكام على الزجاج الأمامي.</translation>
     </message>
     <message>
-        <source>sunnypilot is now in Always Offroad mode. sunnypilot won&apos;t start until Always Offroad mode is disabled. Go to &quot;Settings&quot; -&gt; &quot;Device&quot; to exit Always Offroad mode.</source>
+        <source>chubbs is now in Always Offroad mode. chubbs won&apos;t start until Always Offroad mode is disabled. Go to &quot;Settings&quot; -&gt; &quot;Device&quot; to exit Always Offroad mode.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -918,7 +918,7 @@ This may take up to a minute.</source>
         <translation type="unfinished">البرنامج</translation>
     </message>
     <message>
-        <source>sunnypilot</source>
+        <source>chubbs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1402,7 +1402,7 @@ This may take up to a minute.</source>
     </message>
 </context>
 <context>
-    <name>SunnypilotPanel</name>
+    <name>ChubbsPanel</name>
     <message>
         <source>Modular Assistive Driving System (MADS)</source>
         <translation type="unfinished"></translation>
@@ -1550,7 +1550,7 @@ This may take up to a minute.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable toggle to allow the model to determine when to use sunnypilot ACC or sunnypilot End to End Longitudinal.</source>
+        <source>Enable toggle to allow the model to determine when to use chubbs ACC or chubbs End to End Longitudinal.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -2,8 +2,8 @@
 
 #include <QPushButton>
 
-#ifdef SUNNYPILOT
-#include "selfdrive/ui/sunnypilot/ui.h"
+#ifdef CHUBBS
+#include "selfdrive/ui/chubbs/ui.h"
 #else
 #include "selfdrive/ui/ui.h"
 #endif

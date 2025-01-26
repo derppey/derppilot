@@ -1,0 +1,46 @@
+widgets_src = [
+  "chubbs/qt/widgets/toggle.cc",
+  "chubbs/qt/widgets/controls.cc",
+  "chubbs/qt/widgets/drive_stats.cc",
+  "chubbs/qt/widgets/prime.cc",
+  "chubbs/qt/widgets/scrollview.cc",
+  "chubbs/qt/network/networking.cc",
+]
+
+qt_util = [
+  "chubbs/qt/util.cc",
+]
+
+qt_src = [
+  "chubbs/ui.cc",
+  "chubbs/qt/sidebar.cc",
+  "chubbs/qt/window.cc",
+  "chubbs/qt/home.cc",
+  "chubbs/qt/offroad/offroad_home.cc",
+  "chubbs/qt/offroad/settings/device_panel.cc",
+  "chubbs/qt/offroad/settings/settings.cc",
+  "chubbs/qt/offroad/settings/software_panel.cc",
+  "chubbs/qt/offroad/settings/sunnylink_panel.cc",
+  "chubbs/qt/offroad/settings/chubbs_panel.cc",
+  "chubbs/qt/offroad/settings/trips_panel.cc",
+  "chubbs/qt/offroad/settings/vehicle_panel.cc",
+  "chubbs/qt/onroad/annotated_camera.cc",
+  "chubbs/qt/onroad/buttons.cc",
+  "chubbs/qt/onroad/hud.cc",
+  "chubbs/qt/onroad/model.cc",
+  "chubbs/qt/onroad/onroad_home.cc",
+]
+
+chubbs_panel_qt_src = [
+  "chubbs/qt/offroad/settings/chubbs/mads_settings.cc",
+]
+
+vehicle_panel_qt_src = [
+  "chubbs/qt/offroad/settings/vehicle/platform_selector.cc",
+]
+
+sp_widgets_src = widgets_src
+sp_qt_src = qt_src + chubbs_panel_qt_src + vehicle_panel_qt_src
+sp_qt_util = qt_util
+
+Export('sp_widgets_src', 'sp_qt_src', "sp_qt_util")
