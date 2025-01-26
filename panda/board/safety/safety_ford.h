@@ -180,6 +180,11 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       unsigned int cruise_state = GET_BYTE(to_push, 1) & 0x07U;
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
+      acc_main_on = (cruise_state == 3U) || cruise_engaged;
+    }
+    
+    if (addr == FORD_Steering_Data_FD1) {
+      mads_button_press = GET_BIT(to_push, 40U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
     }
 
     // If steering controls messages are received on the destination bus, it's an indication
@@ -363,42 +368,33 @@ static safety_config ford_init(uint16_t param) {
     {.msg = {{FORD_DesiredTorqBrk, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
+  #define FORD_COMMON_TX_MSGS       \
+    {FORD_Steering_Data_FD1, 0, 8}, \
+    {FORD_Steering_Data_FD1, 2, 8}, \
+    {FORD_ACCDATA_3, 0, 8},         \
+    {FORD_Lane_Assist_Data1, 0, 8}, \
+    {FORD_IPMA_Data, 0, 8},         \
+
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
-    {FORD_Steering_Data_FD1, 0, 8},
-    {FORD_Steering_Data_FD1, 2, 8},
+    FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8},
-    {FORD_ACCDATA_3, 0, 8},
-    {FORD_Lane_Assist_Data1, 0, 8},
     {FORD_LateralMotionControl2, 0, 8},
-    {FORD_IPMA_Data, 0, 8},
   };
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
-    {FORD_Steering_Data_FD1, 0, 8},
-    {FORD_Steering_Data_FD1, 2, 8},
-    {FORD_ACCDATA_3, 0, 8},
-    {FORD_Lane_Assist_Data1, 0, 8},
+    FORD_COMMON_TX_MSGS
     {FORD_LateralMotionControl2, 0, 8},
-    {FORD_IPMA_Data, 0, 8},
   };
 
   static const CanMsg FORD_STOCK_TX_MSGS[] = {
-    {FORD_Steering_Data_FD1, 0, 8},
-    {FORD_Steering_Data_FD1, 2, 8},
-    {FORD_ACCDATA_3, 0, 8},
-    {FORD_Lane_Assist_Data1, 0, 8},
+    FORD_COMMON_TX_MSGS
     {FORD_LateralMotionControl, 0, 8},
-    {FORD_IPMA_Data, 0, 8},
   };
 
   static const CanMsg FORD_LONG_TX_MSGS[] = {
-    {FORD_Steering_Data_FD1, 0, 8},
-    {FORD_Steering_Data_FD1, 2, 8},
+    FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8},
-    {FORD_ACCDATA_3, 0, 8},
-    {FORD_Lane_Assist_Data1, 0, 8},
     {FORD_LateralMotionControl, 0, 8},
-    {FORD_IPMA_Data, 0, 8},
   };
 
   UNUSED(param);
@@ -409,6 +405,9 @@ static safety_config ford_init(uint16_t param) {
   ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 #endif
 
+  // Longitudinal is the default for CAN, and optional for CAN FD w/ ALLOW_DEBUG
+  ford_longitudinal = !ford_canfd || ford_longitudinal;
+
   safety_config ret;
   // FIXME: cppcheck thinks that ford_canfd is always false. This is not true
   // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
@@ -417,6 +416,7 @@ static safety_config ford_init(uint16_t param) {
     ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS) : \
                               BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
   } else {
+    // cppcheck-suppress knownConditionTrueFalse
     ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS) : \
                               BUILD_SAFETY_CFG(ford_rx_checks, FORD_STOCK_TX_MSGS);
   }

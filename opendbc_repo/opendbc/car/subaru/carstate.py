@@ -7,10 +7,13 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.subaru.values import DBC, CanBus, SubaruFlags
 from opendbc.car import CanSignalRateCalculator
 
+from opendbc.sunnypilot.car.subaru.mads import MadsCarState
 
-class CarState(CarStateBase):
-  def __init__(self, CP):
-    super().__init__(CP)
+
+class CarState(CarStateBase, MadsCarState):
+  def __init__(self, CP, CP_SP):
+    CarStateBase.__init__(self, CP, CP_SP)
+    MadsCarState.__init__(self, CP, CP_SP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["Transmission"]["Gear"]
 
@@ -128,6 +131,8 @@ class CarState(CarStateBase):
     if self.CP.flags & SubaruFlags.SEND_INFOTAINMENT:
       self.es_infotainment_msg = copy.copy(cp_cam.vl["ES_Infotainment"])
 
+    MadsCarState.update_mads(self, ret, can_parsers)
+
     return ret
 
   @staticmethod
@@ -167,7 +172,7 @@ class CarState(CarStateBase):
     return messages
 
   @staticmethod
-  def get_can_parsers(CP):
+  def get_can_parsers(CP, CP_SP):
     pt_messages = [
       # sig_address, frequency
       ("Dashlights", 10),

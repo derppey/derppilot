@@ -116,6 +116,14 @@ PairingPopup::PairingPopup(QWidget *parent) : DialogBase(parent) {
   hlayout->addWidget(qr, 1);
 }
 
+int PairingPopup::exec() {
+  if (!util::system_time_valid()) {
+    ConfirmationDialog::alert(tr("Please connect to Wi-Fi to complete initial pairing"), parentWidget());
+    return QDialog::Rejected;
+  }
+  return DialogBase::exec();
+}
+
 
 PrimeUserWidget::PrimeUserWidget(QWidget *parent) : QFrame(parent) {
   setObjectName("primeWidget");
@@ -221,7 +229,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   outer_layout->addWidget(mainLayout);
 
   QWidget *content = new QWidget;
-  QVBoxLayout *content_layout = new QVBoxLayout(content);
+  content_layout = new QVBoxLayout(content);
   content_layout->setContentsMargins(0, 0, 0, 0);
   content_layout->setSpacing(30);
 

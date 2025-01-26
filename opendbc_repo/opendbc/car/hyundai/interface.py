@@ -8,6 +8,10 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
 
+from opendbc.sunnypilot.car.hyundai.enable_radar_tracks import enable_radar_tracks
+from opendbc.sunnypilot.car.hyundai.escc import ESCC_MSG
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+
 ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = structs.CarParams.Ecu
 
@@ -18,7 +22,7 @@ ENABLE_BUTTONS = (ButtonType.accelCruise, ButtonType.decelCruise, ButtonType.can
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "hyundai"
+    ret.brand = "hyundai"
 
     cam_can = CanBus(None, fingerprint).CAM
     hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
@@ -127,8 +131,26 @@ class CarInterface(CarInterfaceBase):
     return ret
 
   @staticmethod
-  def init(CP, can_recv, can_send):
-    if CP.openpilotLongitudinalControl and not (CP.flags & (HyundaiFlags.CANFD_CAMERA_SCC | HyundaiFlags.CAMERA_SCC)):
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
+    if not stock_cp.flags & HyundaiFlags.CANFD:
+      # TODO-SP: add route with ESCC message for process replay
+      if ESCC_MSG in fingerprint[0]:
+        ret.flags |= HyundaiFlagsSP.ENHANCED_SCC.value
+
+      if 0x391 in fingerprint[0]:
+        ret.flags |= HyundaiFlagsSP.HAS_LFA_BUTTON.value
+
+    if ret.flags & HyundaiFlagsSP.ENHANCED_SCC:
+      stock_cp.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ESCC
+      stock_cp.radarUnavailable = False
+
+    return ret
+
+  @staticmethod
+  def init(CP, CP_SP, can_recv, can_send):
+    if CP.openpilotLongitudinalControl and not ((CP.flags & (HyundaiFlags.CANFD_CAMERA_SCC | HyundaiFlags.CAMERA_SCC)) or
+                                                (CP_SP.flags & HyundaiFlagsSP.ENHANCED_SCC)):
       addr, bus = 0x7d0, 0
       if CP.flags & HyundaiFlags.CANFD_HDA2.value:
         addr, bus = 0x730, CanBus(CP).ECAN
@@ -137,3 +159,6 @@ class CarInterface(CarInterfaceBase):
     # for blinkers
     if CP.flags & HyundaiFlags.ENABLE_BLINKERS:
       disable_ecu(can_recv, can_send, bus=CanBus(CP).ECAN, addr=0x7B1, com_cont_req=b'\x28\x83\x01')
+
+    if CP_SP.flags & HyundaiFlagsSP.ENABLE_RADAR_TRACKS:
+      enable_radar_tracks(can_recv, can_send, bus=0, addr=0x7d0)

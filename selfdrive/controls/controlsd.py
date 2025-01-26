@@ -2,7 +2,7 @@
 import math
 from typing import SupportsFloat
 
-from cereal import car, log
+from cereal import car, log, custom
 import cereal.messaging as messaging
 from openpilot.common.conversions import Conversions as CV
 from openpilot.common.params import Params
@@ -19,7 +19,6 @@ from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.controls.lib.vehicle_model import VehicleModel
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 
-
 State = log.SelfdriveState.OpenpilotState
 LaneChangeState = log.LaneChangeState
 LaneChangeDirection = log.LaneChangeDirection
@@ -33,12 +32,17 @@ class Controls:
     self.CP = messaging.log_from_bytes(self.params.get("CarParams", block=True), car.CarParams)
     cloudlog.info("controlsd got CarParams")
 
-    self.CI = get_car_interface(self.CP)
+    cloudlog.info("controlsd is waiting for CarParamsSP")
+    self.CP_SP = messaging.log_from_bytes(self.params.get("CarParamsSP", block=True), custom.CarParamsSP)
+    cloudlog.info("controlsd got CarParamsSP")
+
+    self.CI = get_car_interface(self.CP, self.CP_SP)
 
     self.sm = messaging.SubMaster(['liveParameters', 'liveTorqueParameters', 'modelV2', 'selfdriveState',
                                    'liveCalibration', 'livePose', 'longitudinalPlan', 'carState', 'carOutput',
-                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance'], poll='selfdriveState')
-    self.pm = messaging.PubMaster(['carControl', 'controlsState'])
+                                   'driverMonitoringState', 'onroadEvents', 'driverAssistance'] + ['selfdriveStateSP'],
+                                  poll='selfdriveState')
+    self.pm = messaging.PubMaster(['carControl', 'controlsState'] + ['carControlSP'])
 
     self.steer_limited = False
     self.desired_curvature = 0.0
@@ -88,7 +92,14 @@ class Controls:
 
     # Check which actuators can be enabled
     standstill = abs(CS.vEgo) <= max(self.CP.minSteerSpeed, MIN_LATERAL_CONTROL_SPEED) or CS.standstill
-    CC.latActive = self.sm['selfdriveState'].active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and not standstill
+
+    ss_sp = self.sm['selfdriveStateSP']
+    if ss_sp.mads.available:
+      _lat_active = ss_sp.mads.active
+    else:
+      _lat_active = self.sm['selfdriveState'].active
+
+    CC.latActive = _lat_active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and not standstill
     CC.longActive = CC.enabled and not any(e.overrideLongitudinal for e in self.sm['onroadEvents']) and self.CP.openpilotLongitudinalControl
 
     actuators = CC.actuators
@@ -106,15 +117,16 @@ class Controls:
 
     # accel PID loop
     pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, CS.vCruise * CV.KPH_TO_MS)
-    actuators.accel = self.LoC.update(CC.longActive, CS, long_plan.aTarget, long_plan.shouldStop, pid_accel_limits)
+    actuators.accel = float(self.LoC.update(CC.longActive, CS, long_plan.aTarget, long_plan.shouldStop, pid_accel_limits))
 
     # Steering PID loop and lateral MPC
     self.desired_curvature = clip_curvature(CS.vEgo, self.desired_curvature, model_v2.action.desiredCurvature)
-    actuators.curvature = self.desired_curvature
-    actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(CC.latActive, CS, self.VM, lp,
+    actuators.curvature = float(self.desired_curvature)
+    steer, steeringAngleDeg, lac_log = self.LaC.update(CC.latActive, CS, self.VM, lp,
                                                                             self.steer_limited, self.desired_curvature,
                                                                             self.calibrated_pose) # TODO what if not available
-
+    actuators.steer = float(steer)
+    actuators.steeringAngleDeg = float(steeringAngleDeg)
     # Ensure no NaNs/Infs
     for p in ACTUATOR_FIELDS:
       attr = getattr(actuators, p)
@@ -125,9 +137,12 @@ class Controls:
         cloudlog.error(f"actuators.{p} not finite {actuators.to_dict()}")
         setattr(actuators, p, 0.0)
 
-    return CC, lac_log
+    CC_SP = custom.CarControlSP.new_message()
+    CC_SP.mads = ss_sp.mads
 
-  def publish(self, CC, lac_log):
+    return CC, CC_SP, lac_log
+
+  def publish(self, CC, CC_SP, lac_log):
     CS = self.sm['carState']
 
     # Orientation and angle rates can be useful for carcontroller
@@ -179,7 +194,7 @@ class Controls:
 
     cs.longitudinalPlanMonoTime = self.sm.logMonoTime['longitudinalPlan']
     cs.lateralPlanMonoTime = self.sm.logMonoTime['modelV2']
-    cs.desiredCurvature = self.desired_curvature
+    cs.desiredCurvature = float(self.desired_curvature)
     cs.longControlState = self.LoC.long_control_state
     cs.upAccelCmd = float(self.LoC.pid.p)
     cs.uiAccelCmd = float(self.LoC.pid.i)
@@ -203,12 +218,18 @@ class Controls:
     cc_send.carControl = CC
     self.pm.send('carControl', cc_send)
 
+    # carControlSP
+    cc_sp_send = messaging.new_message('carControlSP')
+    cc_sp_send.valid = CS.canValid
+    cc_sp_send.carControlSP = CC_SP
+    self.pm.send('carControlSP', cc_sp_send)
+
   def run(self):
     rk = Ratekeeper(100, print_delay_threshold=None)
     while True:
       self.update()
-      CC, lac_log = self.state_control()
-      self.publish(CC, lac_log)
+      CC, CC_SP, lac_log = self.state_control()
+      self.publish(CC, CC_SP, lac_log)
       rk.monitor_time()
 
 def main():

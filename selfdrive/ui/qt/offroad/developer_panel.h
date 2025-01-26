@@ -1,6 +1,10 @@
 #pragma once
 
+#ifdef SUNNYPILOT
+#include "selfdrive/ui/sunnypilot/qt/offroad/settings/settings.h"
+#else
 #include "selfdrive/ui/qt/offroad/settings.h"
+#endif
 
 class DeveloperPanel : public ListWidget {
   Q_OBJECT
@@ -10,8 +14,11 @@ public:
 
 private:
   Params params;
+  ParamControl* adbToggle;
   ParamControl* joystickToggle;
   ParamControl* longManeuverToggle;
+  ParamControl* experimentalLongitudinalToggle;
+  ParamControl* hyundaiRadarTracksToggle;
   bool is_release;
   bool offroad;
 

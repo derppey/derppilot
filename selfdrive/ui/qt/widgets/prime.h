@@ -33,6 +33,7 @@ class PairingPopup : public DialogBase {
 
 public:
   explicit PairingPopup(QWidget* parent);
+  int exec() override;
 };
 
 
@@ -62,6 +63,9 @@ public:
 
 signals:
   void openSettings(int index = 0, const QString &param = "");
+
+protected:
+  QVBoxLayout *content_layout;
 
 private:
   PairingPopup *popup;

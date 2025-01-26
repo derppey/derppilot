@@ -42,11 +42,21 @@ def manager_init() -> None:
     ("LongitudinalPersonality", str(log.LongitudinalPersonality.standard)),
   ]
 
+  sunnypilot_default_params: list[tuple[str, str | bytes]] = [
+    ("DynamicExperimentalControl", "0"),
+    ("Mads", "1"),
+    ("MadsMainCruiseAllowed", "1"),
+    ("MadsPauseLateralOnBrake", "0"),
+    ("MadsUnifiedEngagementMode", "1"),
+    ("ModelManager_LastSyncTime", "0"),
+    ("ModelManager_ModelsCache", "")
+  ]
+
   if params.get_bool("RecordFrontLock"):
     params.put_bool("RecordFront", True)
 
   # set unset params
-  for k, v in default_params:
+  for k, v in (default_params + sunnypilot_default_params):
     if params.get(k) is None:
       params.put(k, v)
 
