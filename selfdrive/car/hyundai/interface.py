@@ -107,11 +107,11 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.deadzoneBP = [0.0]
     ret.longitudinalTuning.deadzoneV = [0.0]
     ret.longitudinalTuning.kpBP = [0.0]
-    ret.longitudinalTuning.kiBP = [0.0, CITY_SPEED_LIMIT]
+    ret.longitudinalTuning.kiBP = [0.0]
 
     # HKG tuning without hat trick
     if hkg_tuning and not hat_trick:
-      ret.longitudinalTuning.kiV = [0.02, 0.01]
+      ret.longitudinalTuning.kiV = [0.0]
       ret.vEgoStopping = 0.20
       ret.vEgoStarting = 0.10
       ret.longitudinalActuatorDelay = 0.5
@@ -130,7 +130,6 @@ class CarInterface(CarInterfaceBase):
 
     # HKG tuning with hat trick or just hat trick
     elif (hkg_tuning and hat_trick) or hat_trick:
-      ret.longitudinalTuning.kiV = [0.5, 0.25]
       ret.vEgoStopping = 0.50
       ret.vEgoStarting = 0.10
       ret.longitudinalActuatorDelay = 0.1
@@ -149,6 +148,15 @@ class CarInterface(CarInterfaceBase):
     if use_new_api:
       ret.longitudinalTuning.kiBP = [0.0]
       ret.longitudinalTuning.kiV = [0.0]
+      ret.longitudinalTuning.kpV = [0.1] if is_canfd_car else [0.5]
+      ret.vEgoStopping = 0.30
+      ret.vEgoStarting = 0.10
+      ret.longitudinalActuatorDelay = 0.5
+      if ret.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
+          ret.startingState = False
+      else:
+          ret.startingState = True
+          ret.startAccel = 1.6
       if Params().get_bool("HyundaiRadarTracksAvailable"):
           ret.stoppingDecelRate = 0.01
       else:
