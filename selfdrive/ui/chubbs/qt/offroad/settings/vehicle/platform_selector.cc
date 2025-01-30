@@ -7,12 +7,22 @@
 
 #include "selfdrive/ui/chubbs/qt/offroad/settings/vehicle/platform_selector.h"
 
-#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QMap>
+
+QVariant PlatformSelector::getPlatformBundle(const QString &key) {
+  QString platform_bundle = QString::fromStdString(params.get("CarPlatformBundle"));
+  if (!platform_bundle.isEmpty()) {
+    QJsonDocument json = QJsonDocument::fromJson(platform_bundle.toUtf8());
+    if (!json.isNull() && json.isObject()) {
+      return json.object().value(key).toVariant();
+    }
+  }
+  return {};
+}
 
 PlatformSelector::PlatformSelector() : ButtonControl(tr("Vehicle"), "", "") {
   QObject::connect(this, &ButtonControl::clicked, [=]() {
@@ -25,8 +35,7 @@ PlatformSelector::PlatformSelector() : ButtonControl(tr("Vehicle"), "", "") {
         refresh(offroad);
       }
     } else {
-      params.remove("CarPlatform");
-      params.remove("CarPlatformName");
+      params.remove("CarPlatformBundle");
       refresh(offroad);
     }
   });
@@ -35,14 +44,9 @@ PlatformSelector::PlatformSelector() : ButtonControl(tr("Vehicle"), "", "") {
 }
 
 void PlatformSelector::refresh(bool _offroad) {
-  QString platform_param = QString::fromStdString(params.get("CarPlatform"));
-  if (platform_param.length()) {
-    setValue(QString::fromStdString(params.get("CarPlatformName")));
-    setText("REMOVE");
-  } else {
-    setValue("");
-    setText("SEARCH");
-  }
+  QString name = getPlatformBundle("name").toString();
+  setValue(name);
+  setText(name.isEmpty() ? tr("SEARCH") : tr("REMOVE"));
   setEnabled(true);
 
   offroad = _offroad;
@@ -77,6 +81,7 @@ QMap<QString, QVariantMap> PlatformSelector::loadPlatformList() {
 
       platform_data["year"] = yearList;
       platform_data["make"] = attributes.value("make").toString();
+      platform_data["brand"] = attributes.value("brand").toString();
       platform_data["model"] = attributes.value("model").toString();
       platform_data["platform"] = attributes.value("platform").toString();
       platform_data["package"] = attributes.value("package").toString();
@@ -195,8 +200,17 @@ void PlatformSelector::searchPlatforms(const QString &query) {
                     "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + msg + "</p></body>");
 
     if (ConfirmationDialog(content, tr("Confirm"), tr("Cancel"), true, this).exec()) {
-      params.put("CarPlatform", platform_data["platform"].toString().toStdString());
-      params.put("CarPlatformName", selected_platform.toStdString());
+      QJsonObject json_bundle;
+      json_bundle["platform"] = platform_data["platform"].toString();
+      json_bundle["name"] = selected_platform;
+      json_bundle["make"] = platform_data["make"].toString();
+      json_bundle["brand"] = platform_data["brand"].toString();
+      json_bundle["model"] = platform_data["model"].toString();
+      json_bundle["package"] = platform_data["package"].toString();
+
+      QString json_bundle_str = QString::fromUtf8(QJsonDocument(json_bundle).toJson(QJsonDocument::Compact));
+
+      params.put("CarPlatformBundle", json_bundle_str.toStdString());
     }
   }
 }

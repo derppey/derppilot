@@ -197,8 +197,12 @@ public:
 
   bool isToggled() { return params.getBool(key); }
 
-private:
+  std::string key;
+
+private slots:
   void toggleClicked(bool state);
+
+private:
   void setIcon(bool state) {
     if (state && !active_icon_pixmap.isNull()) {
       icon_label->setPixmap(active_icon_pixmap);
@@ -207,7 +211,6 @@ private:
     }
   }
 
-  std::string key;
   Params params;
   QPixmap active_icon_pixmap;
   bool confirm = false;

@@ -212,10 +212,6 @@ workspace_operations() {
     echo "=== Starting workspace operations ==="
     export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
-    # Reset workspace completely
-    git reset --hard HEAD
-    git clean -fd
-
     # Setup remote if needed
     if ! git remote | grep -q "device"; then
         git remote add device ssh://"${DEVICE_USER}"@"${DEVICE_IP}":/data/openpilot

@@ -10,6 +10,10 @@ from opendbc.car.interfaces import CarControllerBase
 
 from opendbc.chubbs.car.hyundai.escc import EsccCarController
 from opendbc.chubbs.car.hyundai.mads import MadsCarController
+from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalTuning, LongitudinalMode
+from opendbc.chubbs.car.hyundai.values import HyundaiFlagsSP
+
+from cereal import log
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -59,12 +63,18 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     self.apply_steer_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
+    self.hkg_tune = None
+    if CP_SP.flags & HyundaiFlagsSP.HKG_LONGITUDINAL:
+      self.hkg_tune = HKGLongitudinalTuning(CP)
+      self.hkg_enabled = True
+      self.mode = LongitudinalMode.ACC
 
   def update(self, CC, CC_SP, CS, now_nanos):
     EsccCarController.update(self, CS)
     MadsCarController.update(self, self.CP, CC, CC_SP, self.frame)
     actuators = CC.actuators
     hud_control = CC.hudControl
+    accel = actuators.accel
 
     # steering torque
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
@@ -83,8 +93,14 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
 
     self.apply_steer_last = apply_steer
 
-    # accel + longitudinal
-    accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+    # Accel + Longitudinal control
+    if self.hkg_enabled and self.hkg_tune is not None:
+      self.mode = LongitudinalMode.E2E if self.hkg_tune.mpc.mode == 'e2e' else LongitudinalMode.ACC
+      accel = self.hkg_tune.update(accel, CS, np.clip, self.mode)
+      accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+    else:
+      accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
@@ -152,8 +168,8 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
 
       if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
-        # TODO: unclear if this is needed
         jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
+        # TODO: unclear if this is needed
         use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
         can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
                                                         hud_control, set_speed_in_units, stopping,

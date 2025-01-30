@@ -1,4 +1,5 @@
 from panda import Panda
+from common.params import Params
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_RADAR_SCC_CAR, \
@@ -11,6 +12,7 @@ from opendbc.car.disable_ecu import disable_ecu
 from opendbc.chubbs.car.hyundai.enable_radar_tracks import enable_radar_tracks
 from opendbc.chubbs.car.hyundai.escc import ESCC_MSG
 from opendbc.chubbs.car.hyundai.values import HyundaiFlagsSP
+from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalTuning
 
 ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = structs.CarParams.Ecu
@@ -119,6 +121,13 @@ class CarInterface(CarInterfaceBase):
     elif ret.flags & HyundaiFlags.EV:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_EV_GAS
 
+    # Add HKG longitudinal support
+    if Params().get_bool("HKGtuning"):
+      ret.openpilotLongitudinalControl = True
+      ret.pcmCruise = False
+      ret.experimentalLongitudinalAvailable = True
+      HKGLongitudinalTuning(ret).apply_tune(ret)
+
     # Car specific configuration overrides
 
     if candidate == CAR.KIA_OPTIMA_G4_FL:
@@ -144,6 +153,9 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & HyundaiFlagsSP.ENHANCED_SCC:
       stock_cp.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ESCC
       stock_cp.radarUnavailable = False
+    if Params().get_bool("HKGtuning"):
+      ret.flags |= HyundaiFlagsSP.HKG_LONGITUDINAL.value
+      
 
     return ret
 

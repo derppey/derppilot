@@ -8,35 +8,40 @@
 #pragma once
 
 #include "selfdrive/ui/chubbs/qt/offroad/settings/settings.h"
-
 #include "selfdrive/ui/chubbs/qt/offroad/settings/vehicle/platform_selector.h"
 
 class VehiclePanel : public QFrame {
   Q_OBJECT
 
 public:
+  explicit VehiclePanel(QWidget *parent = nullptr);
+
+  // Toggle states
   enum class ToggleState {
     ENABLED,
     DISABLED_LONGITUDINAL,
     DISABLED_DRIVING
   };
 
-  explicit VehiclePanel(QWidget *parent = nullptr);
-
 private:
+  // UI elements
   QStackedLayout* main_layout = nullptr;
   QWidget* vehicleScreen = nullptr;
-  PlatformSelector *platformSelector = nullptr;
-  ParamControl *hkgtuningToggle = nullptr;
-  Params params;
-  bool isOnroad = false;
-  bool reboot_confirmed = false;
-  bool reboot_completed = false;
+  PlatformSelector* platformSelector = nullptr;
+  ParamControlSP* hkgtuningToggle = nullptr;
 
-  void updateToggleState(ParamControl* toggle, bool hasOpenpilotLong);
+  // State tracking
+  Params params;
+  bool offroad;
+  QVariantMap cachedPlatformData;
+
+  // Helper methods
   ToggleState getToggleState(bool hasOpenpilotLong) const;
-  void showRebootPrompt();
+  void updateToggleState(ParamControlSP* toggle, bool hasOpenpilotLong);
+  void updatePlatformCache();
 
 private slots:
   void updateCarToggles();
+  void updateToggles(bool offroad_transition);
+  void handleToggleAction(ParamControlSP* toggle, bool checked);
 };

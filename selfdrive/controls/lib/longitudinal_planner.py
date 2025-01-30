@@ -16,6 +16,7 @@ from openpilot.selfdrive.car.cruise import V_CRUISE_MAX, V_CRUISE_UNSET
 from openpilot.common.swaglog import cloudlog
 
 from openpilot.chubbs.selfdrive.controls.lib.longitudinal_planner import LongitudinalPlannerSP
+from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalTuning
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 A_CRUISE_MIN = -1.2
@@ -76,6 +77,9 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     self.fcw = False
     self.dt = dt
     self.allow_throttle = True
+
+    # Add HKG tuning
+    self.hkg_tune = HKGLongitudinalTuning(CP)
 
     self.a_desired = init_a
     self.v_desired_filter = FirstOrderFilter(init_v, 2.0, self.dt)
@@ -140,6 +144,9 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
     else:
       accel_limits = [ACCEL_MIN, ACCEL_MAX]
       accel_limits_turns = [ACCEL_MIN, ACCEL_MAX]
+
+    if (accel_control := self.compute_accel_limits(v_ego, sm, self.CP)):
+      accel_limits, accel_limits_turns = accel_control
 
     if reset_state:
       self.v_desired_filter.x = v_ego

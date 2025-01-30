@@ -10,6 +10,7 @@
 #include "selfdrive/ui/chubbs/qt/widgets/scrollview.h"
 
 VehiclePanel::VehiclePanel(QWidget *parent) : QFrame(parent) {
+  this->offroad = !uiState()->scene.started;
   main_layout = new QStackedLayout(this);
   ListWidget *list = new ListWidget(this);
 
@@ -20,109 +21,119 @@ VehiclePanel::VehiclePanel(QWidget *parent) : QFrame(parent) {
   platformSelector = new PlatformSelector();
   list->addItem(platformSelector);
 
-  hkgtuningToggle = new ParamControl("HKGtuning",
+  QObject::connect(uiState(), &UIState::offroadTransition, this, &VehiclePanel::updateToggles);
+
+  ScrollViewSP *scroller = new ScrollViewSP(list, this);
+  vlayout->addWidget(scroller);
+
+  QObject::connect(platformSelector, &PlatformSelector::clicked, [=]() {
+    updatePlatformCache();
+    QTimer::singleShot(100, this, &VehiclePanel::updateCarToggles);
+  });
+
+  hkgtuningToggle = new ParamControlSP("HKGtuning",
                                tr("Chubbs Tune"),
                                tr("Enable to experience enhanced vehicle performance tuning"),
                                "../assets/offroad/icon_shell.png",
                                this);
   list->addItem(hkgtuningToggle);
-  hkgtuningToggle->setVisible(false);
-
-  QObject::connect(hkgtuningToggle, &ParamControl::toggleFlipped, [=](bool enabled) {
-    params.putBool("HKGtuning", enabled);
-    if (isOnroad && enabled != params.getBool("HKGtuning")) {
-      showRebootPrompt();
-    }
+  connect(hkgtuningToggle, &ToggleControlSP::toggleFlipped, this, [=](bool checked) {
+    handleToggleAction(hkgtuningToggle, checked);
   });
-
-  QObject::connect(uiState(), &UIState::offroadTransition, [=](bool offroad) {
-    isOnroad = !offroad;
-    updateCarToggles();
-  });
-
-  ScrollViewSP *scroller = new ScrollViewSP(list, this);
-  vlayout->addWidget(scroller);
-
-  QObject::connect(uiState(), &UIState::offroadTransition, platformSelector, &PlatformSelector::refresh);
-
-  QObject::connect(platformSelector, &PlatformSelector::clicked, [=]() {
-    QTimer::singleShot(100, this, &VehiclePanel::updateCarToggles);
-  });
-
-  QTimer *timer = new QTimer(this);
-  QObject::connect(timer, &QTimer::timeout, this, &VehiclePanel::updateCarToggles);
-  timer->start(1000);
 
   main_layout->addWidget(vehicleScreen);
   main_layout->setCurrentWidget(vehicleScreen);
 }
 
-void VehiclePanel::showRebootPrompt() {
-  QString question = tr("Changing this setting requires a reboot to take effect.\n\n"
-                       "Reboot now or later?");
+void VehiclePanel::updatePlatformCache() {
+  cachedPlatformData["brand"] = platformSelector->getPlatformBundle("brand").toString();
+  cachedPlatformData["make"] = platformSelector->getPlatformBundle("make").toString();
+  cachedPlatformData["model"] = platformSelector->getPlatformBundle("model").toString();
+}
 
-  reboot_confirmed = ConfirmationDialog::confirm(question, tr("Reboot Now"), this);
-  if (reboot_confirmed && !reboot_completed) {
-    params.putBool("DoReboot", true);
-    reboot_completed = true;
-  }
+void VehiclePanel::updateToggles(bool offroad_transition) {
+  this->offroad = offroad_transition;
+  platformSelector->refresh(offroad_transition);
+  updatePlatformCache();
+  updateCarToggles();
 }
 
 VehiclePanel::ToggleState VehiclePanel::getToggleState(bool hasOpenpilotLong) const {
   if (!hasOpenpilotLong) {
     return ToggleState::DISABLED_LONGITUDINAL;
   }
-  if (isOnroad) {
+  if (uiState()->scene.started) {
     return ToggleState::DISABLED_DRIVING;
   }
   return ToggleState::ENABLED;
 }
 
-void VehiclePanel::updateToggleState(ParamControl* toggle, bool hasOpenpilotLong) {
+void VehiclePanel::updateToggleState(ParamControlSP* toggle, bool hasOpenpilotLong) {
   static const QString LONGITUDINAL_MSG = tr("Enable openpilot longitudinal control first.");
-  static const QString DRIVING_MSG = tr("Cannot modify while driving. Please go offroad first.");
-  
+  static const QString DRIVING_MSG = tr("Cannot modify while driving. Please go offroad mode first.");
+
   ToggleState state = getToggleState(hasOpenpilotLong);
-  
+
   switch (state) {
     case ToggleState::ENABLED:
-      toggle->setEnabled(true);
-      toggle->setToolTip("");
+      toggle->setDescription("");
       break;
-    case ToggleState::DISABLED_LONGITUDINAL:
-      toggle->setEnabled(false);
-      toggle->setToolTip(LONGITUDINAL_MSG);
+    case ToggleState::DISABLED_LONGITUDINAL: {
+      QString msg = "<font color='orange'>" + tr("Enable openpilot longitudinal control first to modify this setting.") + "</font>";
+      toggle->setDescription(msg);
+      toggle->showDescription();
+      QTimer::singleShot(5000, toggle, &ParamControl::hideDescription);
       break;
-    case ToggleState::DISABLED_DRIVING:
-      toggle->setEnabled(false);
-      toggle->setToolTip(DRIVING_MSG);
+    }
+    case ToggleState::DISABLED_DRIVING: {
+      QString msg = "<font color='orange'>" + tr("Cannot modify while driving. Please go offroad mode first.") + "</font>";
+      toggle->setDescription(msg);
+      toggle->showDescription();
+      QTimer::singleShot(5000, toggle, &ParamControl::hideDescription);
       break;
+    }
   }
+}
+
+void VehiclePanel::handleToggleAction(ParamControlSP* toggle, bool checked) {
+  bool hasOpenpilotLong = params.getBool("ExperimentalLongitudinalEnabled");
+  bool isOffroad = !uiState()->scene.started;
+  if (!isOffroad || !hasOpenpilotLong) {
+    // Revert the toggle state
+    toggle->setEnabled(false);
+    toggle->setValue(QString::number(params.getBool(toggle->key)));
+    
+    if (!isOffroad) {
+      QString msg = "<font color='orange'>" + tr("Cannot modify while driving. Please go offroad first.") + "</font>";
+      toggle->setDescription(msg);
+    } else if (!hasOpenpilotLong) {
+      QString msg = "<font color='orange'>" + tr("Enable openpilot longitudinal control first.") + "</font>";
+      toggle->setDescription(msg);
+    }
+    
+    toggle->showDescription();
+    QTimer::singleShot(5000, toggle, &ParamControlSP::hideDescription);
+    return;
+  }
+  
+  // Enable toggle and apply changes when in offroad mode with longitudinal enabled
+  toggle->setEnabled(true);
+  params.putBool(toggle->key, checked);
+  updateToggleState(toggle, hasOpenpilotLong);
 }
 
 void VehiclePanel::updateCarToggles() {
-  QString platform_name = QString::fromStdString(params.get("CarPlatformName"));
   bool hasOpenpilotLong = params.getBool("ExperimentalLongitudinalEnabled");
 
-  if (platform_name.isEmpty()) {
-    hkgtuningToggle->setVisible(false);
-    return;
-  }
-
-  QVariantMap platform_data = platformSelector->loadPlatformList()[platform_name];
-  if (platform_data.isEmpty()) {
-    hkgtuningToggle->setVisible(false);
-    return;
-  }
-
-  QString make = platform_data["make"].toString().toLower();
+  // Default state - no car selected
+  hkgtuningToggle->setVisible(false);
   
-  bool isHKG = (make == "hyundai" || make == "kia" || make == "genesis");
-  hkgtuningToggle->setVisible(isHKG);
-  
-  if (isHKG) {
+  if (!cachedPlatformData["brand"].toString().isEmpty() && cachedPlatformData["brand"].toString() == "hyundai") {
+    hkgtuningToggle->setVisible(true);
+    hkgtuningToggle->setEnabled(offroad && hasOpenpilotLong);
     updateToggleState(hkgtuningToggle, hasOpenpilotLong);
+  } else if (params.getBool(hkgtuningToggle->key)) {
+    params.putBool(hkgtuningToggle->key, false);
   }
-
-  // Future make-specific toggles can be added here
 }
+
