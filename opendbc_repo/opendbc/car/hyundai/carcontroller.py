@@ -64,6 +64,7 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
     self.hkg_tune = None
+    self.hkg_enabled = False
     if CP_SP.flags & HyundaiFlagsSP.HKG_LONGITUDINAL:
       self.hkg_tune = HKGLongitudinalTuning(CP)
       self.hkg_enabled = True

@@ -51,10 +51,13 @@ class HKGLongitudinalTuning:
   def _init_state(self) -> None:
     """Initialize control state variables"""
     self.current_mode = LongitudinalMode.ACC
-    self.using_e2e = False
+    self.e2e_enabled = False
     self.mode_transition_timer = 0.0
     self.last_accel = 0.0
     self.brake_ramp = 0.0
+    self.brake_ratio = 0.0
+    self.brake_aggressiveness = 0.0
+    self.ramp_rate = 0.0
     self.accel_last = 0.0
 
 
@@ -140,6 +143,8 @@ class HKGLongitudinalTuning:
 
     accel_delta = accel - self.accel_last
     
+    ramp_rate = 0.7
+
     # Handling for transitions into braking
     if accel < 0:
       brake_ratio = clip(abs(accel / CarControllerParams.ACCEL_MIN), 0.0, 1.0)
@@ -153,16 +158,8 @@ class HKGLongitudinalTuning:
                         [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
                         [0.15, 0.25, 0.35, 0.45, 0.6, 0.8])
 
-    # Reduce brake aggressiveness
-    if accel < 0:
-      brake_ratio = clip(abs(accel / CarControllerParams.ACCEL_MIN), 0.0, 1.0)
-      brake_aggressiveness = brake_ratio ** 2.0
-      ramp_rate = interp(brake_aggressiveness,
-                        [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
-                        [0.15, 0.25, 0.35, 0.45, 0.6, 0.8])
-
       if brake_ratio > 0.8:
-            ramp_rate *= 0.8
+        ramp_rate *= 0.8
 
       if self.accel_last >= 0:
         self.brake_ramp = 0.0

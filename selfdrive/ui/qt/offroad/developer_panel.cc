@@ -67,7 +67,7 @@ DeveloperPanel::DeveloperPanel(SettingsWindow *parent) : ListWidget(parent) {
   // error log button
   errorLogBtn = new ButtonControl(tr("Error Log"), tr("VIEW"), tr("View the error log for openpilot crashes."));
   connect(errorLogBtn, &ButtonControl::clicked, [=]() {
-    std::string txt = util::read_file("/data/community/crashes/error.log");
+    std::string txt = util::read_file("/data/community/crashes/error.txt");
     ConfirmationDialog::rich(QString::fromStdString(txt), this);
   });
   addItem(errorLogBtn);

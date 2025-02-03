@@ -56,12 +56,12 @@ def save_exception(content: str) -> None:
 
     files = [
       os.path.join(CRASHES_DIR, datetime.now().strftime("%Y-%m-%d--%H-%M-%S.log")),
-      os.path.join(CRASHES_DIR, "error.log")
+      os.path.join(CRASHES_DIR, "error.txt")
     ]
 
     for fn in files:
       with open(fn, 'w') as f:
-        if fn == "error.log":
+        if fn == "error.txt":
           lines = content.splitlines()[-3:]
           f.write("\n".join(lines))
         else:
