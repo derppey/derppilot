@@ -99,13 +99,6 @@ struct LongitudinalPlanSP @0xf35cc4560bbf6ec2 {
       blended @1;
     }
   }
-
-  enum AccelerationPersonality {
-    sport @0;
-    normal @1;
-    eco @2;
-    stock @3;
-  }
 }
 
 struct OnroadEventSP @0xda96579883444c35 {

@@ -50,7 +50,6 @@ def manager_init() -> None:
     ("MadsUnifiedEngagementMode", "1"),
     ("ModelManager_LastSyncTime", "0"),
     ("ModelManager_ModelsCache", ""),
-    ("AccelPersonality", str(custom.LongitudinalPlanSP.AccelerationPersonality.stock)),
     ("AccelerationPath", "0"),
     ("AccelerationProfile", "0"),
     ("AdjacentLeadsUI", "0"),

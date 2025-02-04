@@ -1537,30 +1537,6 @@ Cela peut prendre jusqu&apos;à une minute.</translation>
         <source>Enable toggle to allow the model to determine when to use chubbs ACC or chubbs End to End Longitudinal.</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Sport</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Normal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Eco</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Stock</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Acceleration Personality</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Normal is recommended. In sport mode, chubbs will provide aggressive acceleration for a dynamic driving experience. In eco mode, chubbs will apply smoother and more relaxed acceleration. On supported cars, you can cycle through these acceleration personality within Onroad Settings on the driving screen.</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>Updater</name>

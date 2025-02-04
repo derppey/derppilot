@@ -11,7 +11,6 @@ from openpilot.selfdrive.controls.lib.longcontrol import LongControl
 from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, STOP_DISTANCE
 from opendbc.car.hyundai.values import HyundaiFlags, CarControllerParams
 from opendbc.car.structs import CarParams
-from chubbs.selfdrive.controls.lib.accel_personality.accel_controller import AccelController
 
 class LongitudinalMode(str, Enum):
     ACC = 'acc'
@@ -45,7 +44,6 @@ class HKGLongitudinalTuning:
     self.hkg_tuning = self.params.get_bool('HKGtuning')
     self.enable_radar_tracks = self.params.get_bool("HyundaiRadarTracks")
     self.sm = SubMaster(RADAR_TRACKS)
-    self.accel_controller = AccelController()
 
   def _init_state(self) -> None:
     """Initialize control state variables"""

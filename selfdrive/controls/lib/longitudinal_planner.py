@@ -145,8 +145,6 @@ class LongitudinalPlanner(LongitudinalPlannerSP):
       accel_limits = [ACCEL_MIN, ACCEL_MAX]
       accel_limits_turns = [ACCEL_MIN, ACCEL_MAX]
 
-    if (accel_control := self.compute_accel_limits(v_ego, sm, self.CP)):
-      accel_limits, accel_limits_turns = accel_control
 
     if reset_state:
       self.v_desired_filter.x = v_ego
