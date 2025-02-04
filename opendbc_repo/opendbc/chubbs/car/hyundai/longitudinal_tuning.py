@@ -1,4 +1,3 @@
-import cereal.messaging as messaging
 import numpy as np
 from cereal import car
 from enum import Enum
@@ -200,6 +199,11 @@ class HKGLongitudinalTuning:
     self.accel_last = accel
 
     return accel
+  
+  def compute_jerk(self, accel: float, vEgo: float, normal_jerk: float) -> float:
+      if accel > 0:
+          return np.interp(vEgo, [0, 3], [0.5, normal_jerk])
+      return normal_jerk
 
   def apply_tune(self, CP: Any) -> None:
     """Apply base tuning parameters to CarParams."""
@@ -207,5 +211,24 @@ class HKGLongitudinalTuning:
     CP.vEgoStarting = 0.1
     CP.stoppingDecelRate = 0.01
     CP.startAccel = 1.0 if bool(CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV)) else 1.6
-    CP.startingState = False if bool(CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV)) else True
+    CP.startingState = True
 
+
+class HKGLongitudinalController:
+    def __init__(self, CP):
+        if Params().get_bool("HKGtuning"):
+            self.tuning = HKGLongitudinalTuning(CP)
+        else:
+            self.tuning = None
+
+    def apply_tune(self, CP):
+        if self.tuning:
+            self.tuning.apply_tune(CP)
+
+    def update(self, accel, CS, clip, mode=LongitudinalMode.ACC):
+        if self.tuning:
+            return self.tuning.update(accel, CS, clip, mode)
+        return accel
+
+    def compute_jerk(self, accel: float, vEgo: float, normal_jerk: float) -> float:
+      return self.tuning.compute_jerk(accel, vEgo, normal_jerk)

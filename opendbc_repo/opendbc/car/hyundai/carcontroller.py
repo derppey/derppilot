@@ -10,8 +10,7 @@ from opendbc.car.interfaces import CarControllerBase
 
 from opendbc.chubbs.car.hyundai.escc import EsccCarController
 from opendbc.chubbs.car.hyundai.mads import MadsCarController
-from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalTuning, LongitudinalMode
-from opendbc.chubbs.car.hyundai.values import HyundaiFlagsSP
+from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalController, LongitudinalMode
 
 from cereal import log
 
@@ -54,6 +53,7 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
     EsccCarController.__init__(self, CP, CP_SP)
     MadsCarController.__init__(self)
+    HKGLongitudinalController.__init__(self, CP)
     self.CAN = CanBus(CP)
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
@@ -63,12 +63,7 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     self.apply_steer_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
-    self.hkg_tune = None
-    self.hkg_enabled = False
-    if CP_SP.flags & HyundaiFlagsSP.HKG_LONGITUDINAL:
-      self.hkg_tune = HKGLongitudinalTuning(CP)
-      self.hkg_enabled = True
-      self.mode = LongitudinalMode.ACC
+    
 
   def update(self, CC, CC_SP, CS, now_nanos):
     EsccCarController.update(self, CS)
@@ -95,9 +90,9 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     self.apply_steer_last = apply_steer
 
     # Accel + Longitudinal control
-    if self.hkg_enabled and self.hkg_tune is not None:
-      self.mode = LongitudinalMode.E2E if self.hkg_tune.mpc.mode == 'e2e' else LongitudinalMode.ACC
-      accel = self.hkg_tune.update(accel, CS, np.clip, self.mode)
+    
+    if hasattr(self, 'tuning') and self.tuning is not None:
+      accel = self.tuning.update(accel, CS, np.clip, LongitudinalMode.ACC)
       accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     else:
       accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
@@ -169,8 +164,8 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
 
       if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
-        jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
-        # TODO: unclear if this is needed
+        normal_jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
+        jerk = self.tuning.compute_jerk(actuators.accel, CS.out.vEgo, normal_jerk) if hasattr(self, 'tuning') and self.tuning is not None else normal_jerk
         use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
         can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
                                                         hud_control, set_speed_in_units, stopping,
