@@ -88,6 +88,21 @@
     </message>
 </context>
 <context>
+    <name>ChubbsPanel</name>
+    <message>
+        <source>Modular Assistive Driving System (MADS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable the beloved MADS feature. Disable toggle to revert back to stock openpilot engagement/disengagement.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Customize MADS</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -157,6 +172,18 @@
     </message>
     <message>
         <source>Enables or disables the github runner service.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="unfinished">عرض</translation>
+    </message>
+    <message>
+        <source>View the error log for openpilot crashes.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -906,10 +933,6 @@ This may take up to a minute.</source>
         <translation type="unfinished">الشبكة</translation>
     </message>
     <message>
-        <source>sunnylink</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Toggles</source>
         <translation type="unfinished">المثبتتات</translation>
     </message>
@@ -932,6 +955,14 @@ This may take up to a minute.</source>
     <message>
         <source>Developer</source>
         <translation type="unfinished">المطور</translation>
+    </message>
+    <message>
+        <source>The Pond</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chubbs</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1142,7 +1173,7 @@ This may take up to a minute.</source>
         <translation type="unfinished">خطأ</translation>
     </message>
     <message>
-        <source>SUNNYLINK</source>
+        <source>THE POND</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1402,21 +1433,6 @@ This may take up to a minute.</source>
     </message>
 </context>
 <context>
-    <name>ChubbsPanel</name>
-    <message>
-        <source>Modular Assistive Driving System (MADS)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable the beloved MADS feature. Disable toggle to revert back to stock openpilot engagement/disengagement.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Customize MADS</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>TermsPage</name>
     <message>
         <source>Terms &amp; Conditions</source>
@@ -1587,6 +1603,33 @@ This may take up to a minute.</source>
     <message>
         <source>Update failed</source>
         <translation>فشل التحديث</translation>
+    </message>
+</context>
+<context>
+    <name>VehiclePanel</name>
+    <message>
+        <source>Chubbs Tune</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable to experience enhanced vehicle performance tuning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable openpilot longitudinal control first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot modify while driving. Please go offroad mode first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable openpilot longitudinal control first to modify this setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot modify while driving. Please go offroad first.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

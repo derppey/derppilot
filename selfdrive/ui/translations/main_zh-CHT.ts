@@ -88,6 +88,21 @@
     </message>
 </context>
 <context>
+    <name>ChubbsPanel</name>
+    <message>
+        <source>Customize MADS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Modular Assistive Driving System (MADS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable the beloved MADS feature. Disable toggle to revert back to stock openpilot engagement/disengagement.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConfirmationDialog</name>
     <message>
         <source>Ok</source>
@@ -158,6 +173,18 @@
     <message>
         <source>On this car, openpilot defaults to the car&apos;s built-in ACC instead of openpilot&apos;s longitudinal control. Enable this to switch to openpilot longitudinal control. Enabling Experimental mode is recommended when enabling openpilot longitudinal control alpha.</source>
         <translation type="unfinished">在這輛車上，openpilot 預設使用車輛內建的主動巡航控制（ACC），而非 openpilot 的縱向控制。啟用此項功能可切換至 openpilot 的縱向控制。當啟用 openpilot 縱向控制 Alpha 版本時，建議同時啟用實驗性模式（Experimental mode）。</translation>
+    </message>
+    <message>
+        <source>Error Log</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>VIEW</source>
+        <translation type="unfinished">觀看</translation>
+    </message>
+    <message>
+        <source>View the error log for openpilot crashes.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -902,15 +929,19 @@ This may take up to a minute.</source>
         <translation>chubbs</translation>
     </message>
     <message>
-        <source>sunnylink</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Trips</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Vehicle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Pond</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chubbs</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1122,7 +1153,7 @@ This may take up to a minute.</source>
         <translation type="unfinished">錯誤</translation>
     </message>
     <message>
-        <source>SUNNYLINK</source>
+        <source>THE POND</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1382,21 +1413,6 @@ This may take up to a minute.</source>
     </message>
 </context>
 <context>
-    <name>ChubbsPanel</name>
-    <message>
-        <source>Customize MADS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Modular Assistive Driving System (MADS)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable the beloved MADS feature. Disable toggle to revert back to stock openpilot engagement/disengagement.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>TermsPage</name>
     <message>
         <source>Terms &amp; Conditions</source>
@@ -1567,6 +1583,33 @@ This may take up to a minute.</source>
     <message>
         <source>Update failed</source>
         <translation>更新失敗</translation>
+    </message>
+</context>
+<context>
+    <name>VehiclePanel</name>
+    <message>
+        <source>Chubbs Tune</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable to experience enhanced vehicle performance tuning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable openpilot longitudinal control first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot modify while driving. Please go offroad mode first.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable openpilot longitudinal control first to modify this setting.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot modify while driving. Please go offroad first.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
