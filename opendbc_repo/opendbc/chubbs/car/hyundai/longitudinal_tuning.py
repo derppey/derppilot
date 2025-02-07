@@ -8,7 +8,7 @@ from cereal.messaging import SubMaster
 from openpilot.common.realtime import DT_CTRL
 from openpilot.common.params import Params
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
-from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, STOP_DISTANCE
+from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc
 from opendbc.car.hyundai.values import HyundaiFlags, CarControllerParams
 from opendbc.car.structs import CarParams
 
@@ -42,7 +42,7 @@ class HKGLongitudinalTuning:
     self.DT_CTRL = DT_CTRL
     self.params = Params()
     self.hkg_tuning = self.params.get_bool('HKGtuning')
-    self.enable_radar_tracks = self.params.get_bool("HyundaiRadarTracks")
+    self.has_radar = self.params.get_bool("HyundaiRadarTracksToggle")
     self.sm = SubMaster(RADAR_TRACKS)
 
   def _init_state(self) -> None:
@@ -92,7 +92,7 @@ class HKGLongitudinalTuning:
     # Check vision lead
     if len(self.sm['modelV2'].leadsV3) > 0:
         vision_lead = self.sm['modelV2'].leadsV3[0]
-        if len(vision_lead.x) > 0 and vision_lead.prob > 0.5:
+        if len(vision_lead.x) > 0 and vision_lead.prob > 0.35:
             lead_distance = min(lead_distance, float(vision_lead.x[0]))
 
     return lead_distance
@@ -103,21 +103,11 @@ class HKGLongitudinalTuning:
     if mode != self.current_mode:
       self.set_mode(mode)
       if self.current_mode == LongitudinalMode.E2E and accel < 0:
-        accel = accel * 0.6
+        accel = accel * 0.85
 
     # Get lead distance and accel limits
     lead_distance = self._get_lead_distance()
 
-    # Force minimum stopping distance
-    min_stopping_distance = STOP_DISTANCE + 1.5
-    if mode == LongitudinalMode.ACC:
-      if lead_distance < min_stopping_distance:
-        target_decel = np.interp(lead_distance,
-                                 [min_stopping_distance - 1.0, min_stopping_distance],
-                                 [-2.0, -1.0])
-        accel = max(target_decel, accel)
-
-      lead_distance = max(lead_distance, min_stopping_distance)
 
     # Determine brake factor based on lead distance
     brake_factor = 1.0
@@ -135,8 +125,9 @@ class HKGLongitudinalTuning:
       accel *= brake_factor
 
     blend = self.get_mode_blend_factor()
+    # Only apply blend factor during braking in E2E mode
     if self.current_mode == LongitudinalMode.E2E and accel < 0:
-      accel *= np.interp(blend, [0.0, 0.3, 0.7, 1.0], [0.65, 0.75, 0.85, 1.0])
+      accel *= np.interp(blend, [0.0, 0.5, 1.0], [0.75, 0.85, 1.0])
 
     accel_delta = accel - self.accel_last
     
@@ -200,6 +191,9 @@ class HKGLongitudinalTuning:
   
   def compute_jerk(self, accel: float, vEgo: float, normal_jerk: float) -> float:
       if accel > 0:
+        if not self.has_radar:
+          return np.interp(vEgo, [0, 3], [1.5, normal_jerk])
+        else: 
           return np.interp(vEgo, [0, 3], [0.5, normal_jerk])
       return normal_jerk
 
@@ -207,7 +201,7 @@ class HKGLongitudinalTuning:
     """Apply base tuning parameters to CarParams."""
     CP.vEgoStopping = 0.3
     CP.vEgoStarting = 0.1
-    CP.stoppingDecelRate = 0.01
+    CP.stoppingDecelRate = 0.01 if self.has_radar else 0.2
     CP.startAccel = 1.0 if bool(CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV)) else 1.6
     CP.startingState = True
 
