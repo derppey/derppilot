@@ -10,7 +10,7 @@ from opendbc.car.interfaces import CarControllerBase
 
 from opendbc.chubbs.car.hyundai.escc import EsccCarController
 from opendbc.chubbs.car.hyundai.mads import MadsCarController
-from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalController, LongitudinalMode
+from opendbc.chubbs.car.hyundai.longitudinal_tuning import HKGLongitudinalController
 
 from cereal import log
 
@@ -92,7 +92,7 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     # Accel + Longitudinal control
     
     if hasattr(self, 'tuning') and self.tuning is not None:
-      accel = self.tuning.update(accel, CS, np.clip, LongitudinalMode.ACC)
+      accel = self.tuning.update(accel, CS, np.clip)
       accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     else:
       accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))

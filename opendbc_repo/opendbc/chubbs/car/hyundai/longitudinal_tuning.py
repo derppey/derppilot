@@ -8,9 +8,10 @@ from cereal.messaging import SubMaster
 from openpilot.common.realtime import DT_CTRL
 from openpilot.common.params import Params
 from openpilot.selfdrive.controls.lib.longcontrol import LongControl
-from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc
+from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import LongitudinalMpc, STOP_DISTANCE
 from opendbc.car.hyundai.values import HyundaiFlags, CarControllerParams
 from opendbc.car.structs import CarParams
+from openpilot.chubbs.selfdrive.controls.lib.dec.dec import DynamicExperimentalController
 
 class LongitudinalMode(str, Enum):
     ACC = 'acc'
@@ -24,7 +25,6 @@ class TuningConstants:
     BRAKE_DISTANCE_SCALE: float = 1.15
     BRAKE_START_SPEED: float = 1.0
 
-RADAR_TRACKS = ['radarState', 'modelV2']
 LongCtrlState = car.CarControl.Actuators.LongControlState
 
 
@@ -42,8 +42,9 @@ class HKGLongitudinalTuning:
     self.DT_CTRL = DT_CTRL
     self.params = Params()
     self.hkg_tuning = self.params.get_bool('HKGtuning')
-    self.has_radar = self.params.get_bool("HyundaiRadarTracksToggle")
-    self.sm = SubMaster(RADAR_TRACKS)
+    self.enable_radar_tracks = self.params.get_bool("HyundaiRadarTracks")
+    self.sm = SubMaster(['carState', 'selfdriveState', 'radarState', 'modelV2'])
+    self.dec_ctrl = DynamicExperimentalController(self.CP, self.mpc, self.params)
 
   def _init_state(self) -> None:
     """Initialize control state variables"""
@@ -97,17 +98,28 @@ class HKGLongitudinalTuning:
 
     return lead_distance
 
-  def update(self, accel, CS, clip,
-             mode: Literal[LongitudinalMode.ACC, LongitudinalMode.E2E] = LongitudinalMode.ACC) -> float:
-    """Update longitudinal control."""
-    if mode != self.current_mode:
-      self.set_mode(mode)
+  def update(self, accel, CS, clip) -> float:
+    """Update longitudinal control using dec to determine mode."""
+    self.dec_ctrl.update(self.sm)
+    dec_mode = self.dec_ctrl.mode()  # returns 'acc' or 'blended'
+    new_mode = LongitudinalMode.ACC if dec_mode == 'acc' else LongitudinalMode.E2E
+    if new_mode != self.current_mode:
+      self.set_mode(new_mode)
       if self.current_mode == LongitudinalMode.E2E and accel < 0:
-        accel = accel * 0.85
+        accel *= 0.75
 
     # Get lead distance and accel limits
     lead_distance = self._get_lead_distance()
 
+    # Force minimum stopping distance
+    min_stopping_distance = STOP_DISTANCE + 3.0
+    if new_mode == LongitudinalMode.ACC:
+      if lead_distance < min_stopping_distance:
+        target_decel = np.interp(lead_distance,
+                                 [min_stopping_distance - 1.0, min_stopping_distance],
+                                 [-2.0, -1.0])
+        accel = max(target_decel, accel)
+      lead_distance = max(lead_distance, min_stopping_distance)
 
     # Determine brake factor based on lead distance
     brake_factor = 1.0
@@ -125,9 +137,8 @@ class HKGLongitudinalTuning:
       accel *= brake_factor
 
     blend = self.get_mode_blend_factor()
-    # Only apply blend factor during braking in E2E mode
     if self.current_mode == LongitudinalMode.E2E and accel < 0:
-      accel *= np.interp(blend, [0.0, 0.5, 1.0], [0.75, 0.85, 1.0])
+      accel *= np.interp(blend, [0.0, 0.5, 0.75, 1.0], [0.65, 0.75, 0.85, 1.0])
 
     accel_delta = accel - self.accel_last
     
@@ -191,9 +202,6 @@ class HKGLongitudinalTuning:
   
   def compute_jerk(self, accel: float, vEgo: float, normal_jerk: float) -> float:
       if accel > 0:
-        if not self.has_radar:
-          return np.interp(vEgo, [0, 3], [1.5, normal_jerk])
-        else: 
           return np.interp(vEgo, [0, 3], [0.5, normal_jerk])
       return normal_jerk
 
@@ -201,7 +209,7 @@ class HKGLongitudinalTuning:
     """Apply base tuning parameters to CarParams."""
     CP.vEgoStopping = 0.3
     CP.vEgoStarting = 0.1
-    CP.stoppingDecelRate = 0.01 if self.has_radar else 0.2
+    CP.stoppingDecelRate = 0.01
     CP.startAccel = 1.0 if bool(CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV)) else 1.6
     CP.startingState = True
 
@@ -217,9 +225,9 @@ class HKGLongitudinalController:
         if self.tuning:
             self.tuning.apply_tune(CP)
 
-    def update(self, accel, CS, clip, mode=LongitudinalMode.ACC):
+    def update(self, accel, CS, clip):
         if self.tuning:
-            return self.tuning.update(accel, CS, clip, mode)
+            return self.tuning.update(accel, CS, clip)
         return accel
 
     def compute_jerk(self, accel: float, vEgo: float, normal_jerk: float) -> float:
