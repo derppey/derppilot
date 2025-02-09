@@ -47,7 +47,7 @@ detect_device_ip() {
 
 # Configuration
 DEVICE_USER="comma"
-DEVICE_IP=$(detect_device_ip)
+DEVICE_IP="192.168.68.66"
 
 # Remove existing SSH keys for DEVICE_IP
 ssh-keygen -R "$DEVICE_IP" > /dev/null 2>&1
